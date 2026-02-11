@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projet Visualisation - Départ Retraite</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .chart-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 50px;
+        }
+
+        .chart-container {
+            width: 60%;
+        }
+
+        .donut-container {
+            width: 35%;
+        }
+
+        #slider-container {
+            margin: 30px 0;
+        }
+
+        .legend text {
+            font-size: 12px;
+        }
+
+        img.logo {
+            width: 80px;
+            height: 80px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>
+        <img src="retraite.jpg" alt="Logo Retraite" class="logo">
+        Analyse des départs à la retraite (2013-2020)
+    </h1>
+
+    <!-- Graphique global + donut -->
+    <div class="chart-row">
+        <div id="graph-global" class="chart-container">
+            <h2>Évolution globale de l'âge de départ</h2>
+        </div>
+        <div id="donut-global" class="donut-container"></div>
+    </div>
+
+    <!-- Graphique CSP + donut -->
+    <div class="chart-row">
+        <div id="graph-csp" class="chart-container">
+            <h2>Évolution par catégorie socioprofessionnelle</h2>
+        </div>
+        <div id="donut-csp" class="donut-container">
+            <h3>Légende :</h3>
+            <svg id="legendCSP" width="200" height="150"></svg>
+        </div>
+    </div>
+
+    <!-- Slider pour donuts -->
+    <div id="slider-container">
+        <h2>Répartition par CSP</h2>
+        <label><strong>Choisir une année :</strong></label>
+        <input type="range" id="yearSlider">
+        <span id="yearLabel"></span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

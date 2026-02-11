@@ -2,7 +2,7 @@
 // DIMENSIONS
 // =============================
 const margin = { top: 50, right: 50, bottom: 50, left: 60 },
-  width = 600 - margin.left - margin.right,
+  width = 650 - margin.left - margin.right,
   height = 400 - margin.top - margin.bottom;
 
 // =============================
@@ -90,8 +90,8 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
   // =============================
   // DONUT GLOBAL
   // =============================
-  const donutWidth = 400,
-    donutHeight = 400;
+  const donutWidth = 300,
+    donutHeight = 300;
   const radius = Math.min(donutWidth, donutHeight) / 2;
 
   const svgDonutGlobal = d3

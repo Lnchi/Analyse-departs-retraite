@@ -94,8 +94,8 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
   // =============================
   // DONUT CSP
   // =============================
-  const donutWidth = 400,
-    donutHeight = 400;
+  const donutWidth = 300,
+    donutHeight = 300;
   const radius = Math.min(donutWidth, donutHeight) / 2;
 
   const svgDonutCSP = d3

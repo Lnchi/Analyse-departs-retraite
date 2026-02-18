@@ -1,72 +1,359 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projet Visualisation - Départ Retraite</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Départ à la Retraite — Analyse Visuelle</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .legend text {
-            font-size: 12px;
+        /* VARIABLES & RESET */
+        :root {
+            --bg: #f7f9fc;
+            --surface: #ffffff;
+            --border: #e0e3e8;
+            --accent: #4a90e2;
+            --accent2: #50e3c2;
+            --muted: #7b8794;
+            --text: #2d3a4b;
+            --text-dim: #7b8794;
+            --radius: 12px;
+            --gap: 24px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        header {
+            border-bottom: 1px solid var(--border);
+            padding: 28px 48px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        header h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(1.6rem, 3vw, 2.4rem);
+            color: var(--accent);
+            line-height: 1.1;
+        }
+
+        header p {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            max-width: 420px;
+            text-align: right;
+            line-height: 1.5;
+        }
+
+        /* NAV TABS */
+        nav {
+            display: flex;
+            gap: 4px;
+            padding: 0 48px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-dim);
+            font-size: 0.82rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 14px 20px;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--text);
+        }
+
+        nav a.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* MAIN LAYOUT */
+        main {
+            padding: 40px 48px;
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+        }
+
+        /* SECTIONS */
+        .section {
+            display: none;
+            flex-direction: column;
+            gap: var(--gap);
+        }
+
+        .section.active {
+            display: flex;
+        }
+
+        .section-header {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .section-label {
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .section-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.7rem;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .section-desc {
+            font-size: 0.88rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            line-height: 1.6;
+            margin-top: 4px;
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card-title {
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        /* ROW LAYOUT */
+        .row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--gap);
+            align-items: stretch;
+        }
+
+        .row .card {
+            flex: 1;
+        }
+
+        /* VISUALIZATION PLACEHOLDERS */
+        .viz-placeholder {
+            flex: 1;
+            background: repeating-linear-gradient(-45deg,
+                    transparent, transparent 8px,
+                    rgba(0, 0, 0, 0.01) 8px, rgba(0, 0, 0, 0.01) 16px);
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 0.8rem;
+            letter-spacing: 0.04em;
+            font-style: italic;
+            min-height: 300px;
+        }
+
+        #graph-global,
+        #graph-csp,
+        #graph-scatter,
+        #graph-task3 {
+            min-height: 320px;
+        }
+
+        #donut-global,
+        #donut-csp {
+            width: 300px;
+            min-height: 300px;
+        }
+
+        /* CONTROLS */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .controls label {
+            font-size: 0.82rem;
+            color: var(--text-dim);
+        }
+
+        .controls input[type="range"] {
+            accent-color: var(--accent);
+            cursor: pointer;
+            width: 200px;
+        }
+
+        #yearLabel {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.2rem;
+            color: var(--accent);
+            min-width: 48px;
+        }
+
+        #legendCSP {
+            display: block;
+            width: 100%;
+        }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            padding: 28px;
+            font-size: 0.78rem;
+            color: var(--muted);
+            border-top: 1px solid var(--border);
+            margin-top: 16px;
         }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Départ à la Retraite<br /><em>en France</em></h1>
+        <p>Analyse visuelle de l'âge de départ à la retraite<br />
+            par catégorie socioprofessionnelle · 2013–2020</p>
+    </header>
 
-    <div class="container py-4">
-
-        <!-- Titre -->
-        <div class="row justify-content-center mb-4">
-            <div class="col-auto text-center">
-                <h1 class="d-flex align-items-center gap-2 justify-content-center">
-                    <img src="retraite.jpg" alt="Logo Retraite" style="width:80px; height:80px;">
-                    Analyse des départs à la retraite (2013-2020)
-                </h1>
+    <nav>
+        <a href="#" class="active" data-section="tache1">Tâche 1 — Tendances</a>
+        <a href="#" data-section="tache2">Tâche 2 — Profils CSP</a>
+        <a href="#" data-section="tache3">Tâche 3 — Analyse libre</a>
+    </nav>
+    <main>
+        <section class="section active" id="tache1">
+            <div class="section-header">
+                <span class="section-label">Tâche 1</span>
+                <h2 class="section-title">Évolution de l'âge de départ à la retraite</h2>
+                <p class="section-desc">
+                    Analyse des tendances entre 2013 et 2020 — évolution globale
+                    et par catégorie socioprofessionnelle.
+                </p>
             </div>
-        </div>
+            <div class="row">
+                <div class="card">
+                    <span class="card-title">Âge moyen de départ à la retraite</span>
+                    <div id="graph-global" class="viz-placeholder"></div>
+                </div>
 
-        <!-- Graphique global + donut -->
-        <div class="row justify-content-center align-items-center mb-5">
-            <div style="flex: 0 0 55%; max-width: 55%;">
-                <div id="graph-global">
-                    <h2 class="text-center">Évolution globale de l'âge de départ</h2>
+                <div class="card" style="align-items:center; text-align:center;">
+                    <span class="card-title">Répartition par année</span>
+                    <div id="donut-global" class="viz-placeholder" style="min-height:300px;"></div>
                 </div>
             </div>
-            <div class="d-flex justify-content-center" style="flex: 0 0 35%; max-width: 35%;">
-                <div id="donut-global"></div>
-            </div>
-        </div>
+            <div class="row">
+                <div class="card">
+                    <span class="card-title">Âge de départ par catégorie socioprofessionnelle</span>
+                    <div id="graph-csp" class="viz-placeholder"></div>
+                </div>
 
-        <!-- Graphique CSP + donut -->
-        <div class="row justify-content-center align-items-center mb-5">
-            <div style="flex: 0 0 55%; max-width: 55%;">
-                <div id="graph-csp">
-                    <h2 class="text-center">Évolution par catégorie socioprofessionnelle</h2>
+                <div class="card" style="align-items:center; text-align:center; gap:20px;">
+                    <span class="card-title">Détail CSP — Année sélectionnée</span>
+                    <div class="controls">
+                        <label for="yearSlider">Année :</label>
+                        <input type="range" id="yearSlider" />
+                        <span id="yearLabel">—</span>
+                    </div>
+                    <div id="donut-csp" class="viz-placeholder" style="min-height:300px;"></div>
+                    <svg id="legendCSP" height="180"></svg>
                 </div>
             </div>
-            <div class="d-flex justify-content-center flex-column align-items-center" style="flex: 0 0 35%; max-width: 35%;">
-                <div id="donut-csp">
-                    <h3>Légende :</h3>
-                    <svg id="legendCSP" width="200" height="150"></svg>
+        </section>
+        <section class="section" id="tache2">
+            <div class="section-header">
+                <span class="section-label">Tâche 2</span>
+                <h2 class="section-title">Profils des catégories socioprofessionnelles</h2>
+                <p class="section-desc">
+                    Comparaison des CSP selon l'âge de départ, la proportion de retraités à 61 ans
+                    et la durée moyenne sans emploi. Identification des groupes et cas particuliers.
+                </p>
+            </div>
+            <div class="card">
+                <span class="card-title">Nuage de points / Scatter plot — Profils CSP</span>
+                <div id="graph-scatter" class="viz-placeholder">
+                    Visualisation scatter plot ou radar chart (Tâche 2)
                 </div>
             </div>
-        </div>
-
-        <!-- Slider -->
-        <div class="row justify-content-center mb-4">
-            <div class="col-12 col-md-6 text-center">
-                <h2>Répartition par CSP</h2>
-                <label class="form-label"><strong>Choisir une année :</strong></label>
-                <input type="range" id="yearSlider" class="form-range">
-                <span id="yearLabel"></span>
+        </section>
+        <section class="section" id="tache3">
+            <div class="section-header">
+                <span class="section-label">Tâche 3</span>
+                <h2 class="section-title">Analyse libre</h2>
+                <p class="section-desc">
+                    Visualisation interactive au choix — besoin et type à définir.
+                </p>
             </div>
-        </div>
 
-    </div>
+            <div class="card">
+                <span class="card-title">Visualisation libre (à compléter)</span>
+                <div id="graph-task3" class="viz-placeholder">
+                    Espace réservé — Tâche 3
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        Données : departretraite_parcsp.csv · Source : statistiques publiques françaises
+    </footer>
+    <script>
+        // Navigation par onglets
+        const navLinks = document.querySelectorAll('nav a');
+        const sections = document.querySelectorAll('.section');
 
+        navLinks.forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                const target = link.dataset.section;
+
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                sections.forEach(s => {
+                    s.classList.toggle('active', s.id === target);
+                });
+            });
+        });
+    </script>
     <script src="global.js"></script>
     <script src="csp.js"></script>
+    <script src="tache3.js"></script>
 </body>
 </html>

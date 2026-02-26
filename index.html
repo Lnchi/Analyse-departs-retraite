@@ -274,9 +274,21 @@
                     <div id="graph-global" class="viz-placeholder"></div>
                 </div>
 
-                <div class="card" style="align-items:center; text-align:center;">
-                    <span class="card-title">Répartition par année</span>
-                    <div id="donut-global" class="viz-placeholder" style="min-height:300px;"></div>
+                <div class="card">
+                    <span class="card-title">Détails de l'année sélectionnée</span>
+                    <div id="panel-details" style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                        <h3 style="margin-top: 0; font-family: 'DM Serif Display', serif; color: var(--text);" id="panel-title">Bilan global</h3>
+                        <p style="font-size: 28px; font-weight: bold; color: var(--accent); margin: 10px 0;" id="panel-mean">- ans</p>
+                        <hr style="border: 0; border-top: 1px solid var(--border); margin: 15px 0;">
+                        
+                        <div style="font-size: 14px; line-height: 1.6;">
+                            <div>🔴 <strong style="color: var(--text-dim);">Départ le plus tôt :</strong><br> <span id="panel-min-csp" style="color: var(--text); font-weight: 500;">-</span> (<span id="panel-min-age">-</span> ans)</div>
+                            <div style="margin-top: 10px;">🔵 <strong style="color: var(--text-dim);">Départ le plus tard :</strong><br> <span id="panel-max-csp" style="color: var(--text); font-weight: 500;">-</span> (<span id="panel-max-age">-</span> ans)</div>
+                            <div style="margin-top: 15px; padding: 12px; background: var(--bg); border-radius: var(--radius); border: 1px solid var(--border);">
+                                ⚖️ <strong style="color: var(--text-dim);">Écart :</strong> <span id="panel-gap" style="font-weight:bold; color: var(--text); font-size: 1.1em;">-</span> ans
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row">

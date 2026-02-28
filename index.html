@@ -199,12 +199,6 @@
             min-height: 320px;
         }
 
-        #donut-global,
-        #donut-csp {
-            width: 300px;
-            min-height: 300px;
-        }
-
         /* CONTROLS */
         .controls {
             display: flex;
@@ -234,6 +228,24 @@
         #legendCSP {
             display: block;
             width: 100%;
+        }
+
+        #csp {
+            width: 100%;
+            min-height: unset;
+        }
+
+        #csp svg {
+            display: block;
+        }
+
+        #csp {
+            background: repeating-linear-gradient(-45deg,
+                    transparent, transparent 8px,
+                    rgba(0, 0, 0, 0.01) 8px, rgba(0, 0, 0, 0.01) 16px);
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 16px;
         }
 
         /* FOOTER */
@@ -313,13 +325,14 @@
 
                 <div class="card" style="align-items:center; text-align:center; gap:20px;">
                     <span class="card-title">Détail CSP — Année sélectionnée</span>
-                    <div class="controls">
-                        <label for="yearSlider">Année :</label>
-                        <input type="range" id="yearSlider" />
-                        <span id="yearLabel">—</span>
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
+                        <span style="font-size:0.82rem; color:var(--text-dim);">Année :</span>
+                        <span id="yearLabel"
+                            style="font-family:'DM Serif Display',serif; font-size:1.2rem; color:var(--accent);">—</span>
                     </div>
-                    <div id="donut-csp" class="viz-placeholder" style="min-height:300px;"></div>
-                    <svg id="legendCSP" height="180"></svg>
+                    <div id="year-selector" style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center;">
+                    </div>
+                    <div id="csp"></div>
                 </div>
             </div>
         </section>

@@ -10,13 +10,11 @@
         rel="stylesheet" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        /* VARIABLES & RESET */
         :root {
             --bg: #f7f9fc;
             --surface: #ffffff;
             --border: #e0e3e8;
             --accent: #4a90e2;
-            --accent2: #50e3c2;
             --muted: #7b8794;
             --text: #2d3a4b;
             --text-dim: #7b8794;
@@ -39,7 +37,6 @@
             min-height: 100vh;
         }
 
-        /* HEADER */
         header {
             border-bottom: 1px solid var(--border);
             padding: 28px 48px;
@@ -64,7 +61,6 @@
             line-height: 1.5;
         }
 
-        /* NAV TABS */
         nav {
             display: flex;
             gap: 4px;
@@ -94,7 +90,6 @@
             border-bottom-color: var(--accent);
         }
 
-        /* MAIN LAYOUT */
         main {
             padding: 40px 48px;
             display: flex;
@@ -102,7 +97,6 @@
             gap: 48px;
         }
 
-        /* SECTIONS */
         .section {
             display: none;
             flex-direction: column;
@@ -142,7 +136,6 @@
             margin-top: 4px;
         }
 
-        /* CARDS */
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -161,7 +154,6 @@
             font-weight: 500;
         }
 
-        /* ROW LAYOUT */
         .row {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -169,11 +161,6 @@
             align-items: stretch;
         }
 
-        .row .card {
-            flex: 1;
-        }
-
-        /* VISUALIZATION PLACEHOLDERS */
         .viz-placeholder {
             flex: 1;
             background: repeating-linear-gradient(-45deg,
@@ -199,25 +186,6 @@
             min-height: 320px;
         }
 
-        /* CONTROLS */
-        .controls {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .controls label {
-            font-size: 0.82rem;
-            color: var(--text-dim);
-        }
-
-        .controls input[type="range"] {
-            accent-color: var(--accent);
-            cursor: pointer;
-            width: 200px;
-        }
-
         #yearLabel {
             font-family: 'DM Serif Display', serif;
             font-size: 1.2rem;
@@ -225,21 +193,9 @@
             min-width: 48px;
         }
 
-        #legendCSP {
-            display: block;
-            width: 100%;
-        }
-
+        /* Bar chart CSP */
         #csp {
             width: 100%;
-            min-height: unset;
-        }
-
-        #csp svg {
-            display: block;
-        }
-
-        #csp {
             background: repeating-linear-gradient(-45deg,
                     transparent, transparent 8px,
                     rgba(0, 0, 0, 0.01) 8px, rgba(0, 0, 0, 0.01) 16px);
@@ -248,7 +204,10 @@
             padding: 16px;
         }
 
-        /* FOOTER */
+        #csp svg {
+            display: block;
+        }
+
         footer {
             text-align: center;
             padding: 28px;
@@ -272,7 +231,9 @@
         <a href="#" data-section="tache2">Tâche 2 — Profils CSP</a>
         <a href="#" data-section="tache3">Tâche 3 — Analyse libre</a>
     </nav>
+
     <main>
+        <!-- TÂCHE 1 -->
         <section class="section active" id="tache1">
             <div class="section-header">
                 <span class="section-label">Tâche 1</span>
@@ -282,53 +243,59 @@
                     et par catégorie socioprofessionnelle.
                 </p>
             </div>
+
             <div class="row">
+                <!-- Graphique global -->
                 <div class="card">
                     <span class="card-title">Âge moyen de départ à la retraite</span>
                     <div id="graph-global" class="viz-placeholder"></div>
                 </div>
 
+                <!-- Panneau de détails -->
                 <div class="card">
                     <span class="card-title">Détails de l'année sélectionnée</span>
                     <div id="panel-details"
-                        style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
-                        <h3 style="margin-top: 0; font-family: 'DM Serif Display', serif; color: var(--text);"
-                            id="panel-title">Bilan global</h3>
-                        <p style="font-size: 28px; font-weight: bold; color: var(--accent); margin: 10px 0;"
-                            id="panel-mean">- ans</p>
-                        <hr style="border: 0; border-top: 1px solid var(--border); margin: 15px 0;">
-
-                        <div style="font-size: 14px; line-height: 1.6;">
-                            <div>🔴 <strong style="color: var(--text-dim);">Départ le plus tôt :</strong><br> <span
-                                    id="panel-min-csp" style="color: var(--text); font-weight: 500;">-</span> (<span
-                                    id="panel-min-age">-</span> ans)</div>
-                            <div style="margin-top: 10px;">🔵 <strong style="color: var(--text-dim);">Départ le plus
-                                    tard :</strong><br> <span id="panel-max-csp"
-                                    style="color: var(--text); font-weight: 500;">-</span> (<span
-                                    id="panel-max-age">-</span> ans)</div>
+                        style="display:flex; flex-direction:column; justify-content:center; height:100%;">
+                        <h3 id="panel-title" style="font-family:'DM Serif Display',serif; color:var(--text);">Bilan
+                            global</h3>
+                        <p id="panel-mean"
+                            style="font-size:28px; font-weight:bold; color:var(--accent); margin:10px 0;">- ans</p>
+                        <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
+                        <div style="font-size:14px; line-height:1.6;">
+                            <div>🔴 <strong style="color:var(--text-dim);">Départ le plus tôt :</strong><br>
+                                <span id="panel-min-csp" style="color:var(--text); font-weight:500;">-</span>
+                                (<span id="panel-min-age">-</span> ans)
+                            </div>
+                            <div style="margin-top:10px;">🔵 <strong style="color:var(--text-dim);">Départ le plus tard
+                                    :</strong><br>
+                                <span id="panel-max-csp" style="color:var(--text); font-weight:500;">-</span>
+                                (<span id="panel-max-age">-</span> ans)
+                            </div>
                             <div
-                                style="margin-top: 15px; padding: 12px; background: var(--bg); border-radius: var(--radius); border: 1px solid var(--border);">
-                                ⚖️ <strong style="color: var(--text-dim);">Écart :</strong> <span id="panel-gap"
-                                    style="font-weight:bold; color: var(--text); font-size: 1.1em;">-</span> ans
+                                style="margin-top:15px; padding:12px; background:var(--bg); border-radius:var(--radius); border:1px solid var(--border);">
+                                ⚖️ <strong style="color:var(--text-dim);">Écart :</strong>
+                                <span id="panel-gap"
+                                    style="font-weight:bold; color:var(--text); font-size:1.1em;">-</span> ans
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div class="row">
+                <!-- Graphique CSP multi-lignes -->
                 <div class="card">
                     <span class="card-title">Âge de départ par catégorie socioprofessionnelle</span>
                     <div id="graph-csp" class="viz-placeholder"></div>
-                    <!-- Boutons CSP sous le graphique -->
                     <div id="csp-selector" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;"></div>
                 </div>
 
+                <!-- Bar chart + sélecteur d'années -->
                 <div class="card" style="align-items:center; text-align:center; gap:20px;">
                     <span class="card-title">Détail CSP — Année sélectionnée</span>
                     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
                         <span style="font-size:0.82rem; color:var(--text-dim);">Année :</span>
-                        <span id="yearLabel"
-                            style="font-family:'DM Serif Display',serif; font-size:1.2rem; color:var(--accent);">—</span>
+                        <span id="yearLabel">—</span>
                     </div>
                     <div id="year-selector" style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center;">
                     </div>
@@ -336,6 +303,8 @@
                 </div>
             </div>
         </section>
+
+        <!-- TÂCHE 2 -->
         <section class="section" id="tache2">
             <div class="section-header">
                 <span class="section-label">Tâche 2</span>
@@ -360,7 +329,7 @@
                     Visualisation interactive au choix — besoin et type à définir.
                 </p>
             </div>
-
+            <!-- TÂCHE 3 -->
             <div class="card">
                 <span class="card-title">Visualisation libre (à compléter)</span>
                 <div id="graph-task3" class="viz-placeholder">
@@ -369,9 +338,11 @@
             </div>
         </section>
     </main>
+
     <footer>
         Données : departretraite_parcsp.csv · Source : statistiques publiques françaises
     </footer>
+
     <script>
         // Navigation par onglets
         const navLinks = document.querySelectorAll('nav a');
@@ -381,16 +352,13 @@
             link.addEventListener('click', e => {
                 e.preventDefault();
                 const target = link.dataset.section;
-
                 navLinks.forEach(l => l.classList.remove('active'));
                 link.classList.add('active');
-
-                sections.forEach(s => {
-                    s.classList.toggle('active', s.id === target);
-                });
+                sections.forEach(s => s.classList.toggle('active', s.id === target));
             });
         });
     </script>
+
     <script src="global.js"></script>
     <script src="csp.js"></script>
     <script src="tache2.js"></script>

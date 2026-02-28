@@ -1,4 +1,5 @@
 d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
+  // Nettoyage des données
   data.forEach((d) => {
     d.annee_num = +d.annee;
     d.age_num = +d["Âge conjoncturel de départ à la retraite"].replace(
@@ -11,14 +12,13 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
   const categories = Array.from(
     new Set(data.map((d) => d["Catégorie socioprofessionnelle"])),
   );
-
   const color = d3.scaleOrdinal().domain(categories).range(d3.schemeTableau10);
 
   let selectedYear = years[0];
   let selectedCSP = null;
 
   // =============================
-  // MULTI-LINE CHART
+  // GRAPHIQUE MULTI-LIGNES PAR CSP
   // =============================
   const svg2 = d3
     .select("#graph-csp")
@@ -51,7 +51,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .attr("fill", "black")
     .text("Âge");
 
-  // Ligne verticale année sélectionnée
+  // Ligne verticale pour l'année sélectionnée
   const verticalLine = svg2
     .append("line")
     .attr("y1", 0)
@@ -65,7 +65,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     verticalLine.attr("x1", x2(selectedYear)).attr("x2", x2(selectedYear));
   }
 
-  // Données par CSP
+  // Préparation des données par CSP
   const dataByCSP = categories.map((cat) => ({
     category: cat,
     values: years
@@ -84,7 +84,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .x((d) => x2(d.annee))
     .y((d) => y2(d.age));
 
-  // Fond pour désélectionner CSP
+  // Fond cliquable pour désélectionner la CSP
   svg2
     .append("rect")
     .attr("width", width)
@@ -94,10 +94,10 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       selectedCSP = null;
       updateHighlight();
       updateCSPButtons();
-      updateDonutCSP(selectedYear);
+      updateBarChart(selectedYear);
     });
 
-  // Lignes
+  // Lignes par CSP
   const lines = svg2
     .selectAll(".line-csp")
     .data(dataByCSP)
@@ -113,18 +113,16 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       selectedCSP = selectedCSP === d.category ? null : d.category;
       updateHighlight();
       updateCSPButtons();
-      updateDonutCSP(selectedYear);
+      updateBarChart(selectedYear);
     });
 
-  // Points interactifs
-  const dotsGroups = svg2
+  // Points interactifs sur les lignes
+  svg2
     .selectAll(".dots-group")
     .data(dataByCSP)
     .enter()
     .append("g")
-    .attr("class", "dots-group");
-
-  dotsGroups
+    .attr("class", "dots-group")
     .selectAll("circle")
     .data((d) => d.values.map((v) => ({ ...v, category: d.category })))
     .enter()
@@ -157,7 +155,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       selectedYear = d.annee;
       updateVerticalLine();
       updateYearButtons();
-      updateDonutCSP(selectedYear);
+      updateBarChart(selectedYear);
     });
 
   function updateHighlight() {
@@ -176,7 +174,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
   }
 
   // =============================
-  // TABLEAU D'ANNÉES
+  // BOUTONS DE SÉLECTION D'ANNÉE
   // =============================
   const yearContainer = d3.select("#year-selector");
 
@@ -201,7 +199,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       selectedYear = d;
       updateYearButtons();
       updateVerticalLine();
-      updateDonutCSP(selectedYear);
+      updateBarChart(selectedYear);
     });
 
   function updateYearButtons() {
@@ -217,16 +215,14 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
   }
 
   // =============================
-  // TABLEAU DE CSP (boutons)
+  // BOUTONS DE SÉLECTION DE CSP
   // =============================
   const cspContainer = d3.select("#csp-selector");
-
   const categoriesLabels = categories.map((cat) => ({
     full: cat,
     short: cat.replace(/^\d+\s*-\s*/, ""),
   }));
 
-  // Bouton "Toutes les CSP" — sélectionné par défaut
   cspContainer
     .append("div")
     .attr("class", "csp-btn csp-btn-all")
@@ -248,10 +244,9 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     selectedCSP = null;
     updateHighlight();
     updateCSPButtons();
-    updateDonutCSP(selectedYear);
+    updateBarChart(selectedYear);
   });
 
-  // Boutons par catégorie
   cspContainer
     .selectAll(".csp-btn-item")
     .data(categoriesLabels)
@@ -283,7 +278,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       selectedCSP = selectedCSP === d.full ? null : d.full;
       updateHighlight();
       updateCSPButtons();
-      updateDonutCSP(selectedYear);
+      updateBarChart(selectedYear);
     });
 
   function updateCSPButtons() {
@@ -305,7 +300,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
   }
 
   // =============================
-  // BAR CHART CSP
+  // BAR CHART — DÉTAIL PAR ANNÉE
   // =============================
   const barMargin = { top: 20, right: 20, bottom: 160, left: 50 };
   const barWidth = 420 - barMargin.left - barMargin.right;
@@ -324,13 +319,10 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .domain(categories)
     .range([0, barWidth])
     .padding(0.25);
-
   const yBar = d3.scaleLinear().domain([58, 66]).range([barHeight, 0]);
 
-  // Axes
   svgBar
     .append("g")
-    .attr("class", "x-axis")
     .attr("transform", `translate(0,${barHeight})`)
     .call(
       d3.axisBottom(xBar).tickFormat((cat) => cat.replace(/^\d+\s*-\s*/, "")),
@@ -351,7 +343,6 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .style("text-anchor", "middle")
     .text("Âge moyen de départ");
 
-  // Barres
   svgBar
     .selectAll(".bar-csp")
     .data(categories)
@@ -363,7 +354,6 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .attr("fill", (d) => color(d))
     .attr("rx", 3);
 
-  // Labels au-dessus des barres
   svgBar
     .selectAll(".bar-label")
     .data(categories)
@@ -376,10 +366,9 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .attr("font-weight", "bold")
     .attr("fill", "#333");
 
-  function updateDonutCSP(year) {
+  function updateBarChart(year) {
     const filtered = data.filter((d) => d.annee_num === year);
 
-    // Mise à jour barres
     svgBar
       .selectAll(".bar-csp")
       .data(categories)
@@ -400,7 +389,6 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
         return entry ? barHeight - yBar(entry.age_num) : 0;
       });
 
-    // Mise à jour labels
     svgBar
       .selectAll(".bar-label")
       .data(categories)
@@ -423,7 +411,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     d3.select("#yearLabel").text(year);
   }
 
-  // Init
+  // Initialisation
   updateVerticalLine();
-  updateDonutCSP(selectedYear);
+  updateBarChart(selectedYear);
 });

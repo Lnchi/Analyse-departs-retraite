@@ -105,12 +105,12 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
         .enter().append("option").text(d => d).attr("value", d => d); // On ajoute les options au select
 
     // 7. UPDATE (Avec Info-bulle multi-lignes) et Quadrillage
-    function update(selectedYear) { // Fonction pour mettre à jour le graphique en fonction de l'année sélectionnée
-        svg.selectAll(".info-group").remove(); // On supprime les info-bulles précédentes
-        const filtered = selectedYear === "Toutes" ? data : data.filter(d => d.annee == selectedYear); // On filtre les données en fonction de l'année sélectionnée
+    function update(selectedYear, subset = null) {
+        svg.selectAll(".info-group").remove();
+        const filtered = subset ? subset : (selectedYear === "Toutes" ? data : data.filter(d => d.annee == selectedYear));
 
-        const circles = svg.selectAll("circle.dot") // On sélectionne les cercles
-            .data(filtered, d => d.csp_clean + d.annee); // On lie les données aux cercles
+        const circles = svg.selectAll("circle.dot")
+            .data(filtered, d => d.csp_clean + d.annee);
 
         circles.join( // On met à jour les cercles
             enter => enter.append("circle") // On ajoute les cercles qui n'existent pas encore
@@ -183,23 +183,66 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
         updateAnalyse(filtered, selectedYear); // On met à jour l'analyse
     }
 
-    // 8. LÉGENDE (Multi-lignes)
-    const legend = svg.append("g").attr("transform", `translate(${width + 35}, 10)`); // On ajoute un groupe pour la légende
-    categories.forEach((cat, i) => { // Pour chaque catégorie
-        // Augmentation de l'espacement vertical (38px) pour les doubles lignes
-        const row = legend.append("g").attr("transform", `translate(0, ${i * 38})`); // On ajoute un groupe pour chaque ligne
-        row.append("circle").attr("r", 6).attr("fill", color(cat)); // On ajoute un cercle pour chaque ligne
-        
-        const [l1, l2] = splitText(cat, 25); // On split le texte en deux lignes si nécessaire
-        const textElement = row.append("text") // On ajoute un texte pour chaque ligne
-            .attr("x", 18).attr("y", 4) // On définit la position du texte
-            .style("font-size", "10px").style("fill", "#2d3a4b"); // On définit la taille et la couleur du texte
+    // === LÉGENDE INTERACTIVE (Multi-lignes + clic pour filtrer) ===
 
-        textElement.append("tspan").attr("x", 18).text(l1); // On ajoute la première ligne
-        if (l2) { // Si la deuxième ligne existe
-            textElement.append("tspan").attr("x", 18).attr("dy", "1.2em").text(l2); // On ajoute la deuxième ligne avec un espacement vertical de 1.2em
-        }
-    });
+// Position du bouton “Tout afficher”
+const legendX = width + 35;
+const legendY = 10;
+
+// Créer un groupe pour la légende entière
+const legendGroup = svg.append("g")
+    .attr("transform", `translate(${legendX}, ${legendY})`);
+
+// Bouton "Tout afficher"
+const allBtn = legendGroup.append("g")
+    .attr("class", "legend-btn")
+    .style("cursor", "pointer")
+    .on("click", () => update("Toutes")); // remet toutes les catégories
+
+// Rectangle du bouton
+allBtn.append("rect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", 80)
+    .attr("height", 20)
+    .attr("rx", 5)
+    .attr("fill", "#f0f0f0")
+    .attr("stroke", "#999");
+
+// Texte du bouton
+allBtn.append("text")
+    .attr("x", 40)
+    .attr("y", 14)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "11px")
+    .attr("fill", "#333")
+    .text("Tout afficher");
+
+// 2️⃣ Catégories
+const categoriesYStart = 30; // espace entre le bouton et la première catégorie
+categories.forEach((cat, i) => {
+    const row = legendGroup.append("g")
+        .attr("transform", `translate(0, ${categoriesYStart + i * 45})`) // 45 = hauteur d'une ligne (avec multi-lignes)
+        .style("cursor", "pointer")
+        .on("click", () => {
+            const filtered = data.filter(d => d.csp_clean === cat);
+            update("Toutes", filtered);
+        });
+
+    row.append("circle")
+        .attr("r", 6)
+        .attr("fill", color(cat));
+
+    const [l1, l2] = splitText(cat, 18);
+    const textElement = row.append("text")
+        .attr("x", 18)
+        .attr("y", 4)
+        .style("font-size", "10px")
+        .style("fill", "#2d3a4b");
+
+    textElement.append("tspan").attr("x", 18).attr("dy", "0em").text(l1);
+    if (l2) textElement.append("tspan").attr("x", 18).attr("dy", "1.2em").text(l2);
+});
 
     // 9. TOP 3 
     function updateTop3(filtered) { // fonction pour mettre à jour le top 3

@@ -178,6 +178,23 @@
             font-style: italic;
             min-height: 300px;
         }
+        #graph-scatter-sante {
+            background: repeating-linear-gradient(-45deg,
+            transparent, transparent 8px,
+            rgba(0, 0, 0, 0.01) 8px, rgba(0, 0, 0, 0.01) 16px);
+        }
+        #graph-scatter-sante svg {
+            background: transparent;
+        }
+        #graph-heatmap-sante {
+            background: repeating-linear-gradient(-45deg,
+             transparent, transparent 8px,
+             rgba(0, 0, 0, 0.01) 8px, rgba(0, 0, 0, 0.01) 16px);
+        }
+
+        #graph-heatmap-sante svg {
+            background: transparent;
+        }
 
         #graph-global,
         #graph-csp,
@@ -231,6 +248,49 @@
 
         #analyse-content ul li {
              margin-bottom: 8px;
+        }
+        /* ------------------------ Tooltip Heatmap ------------------------ */
+        .tooltip-hm {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            color: #2d3a4b;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 8px 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            pointer-events: none;
+            transition: opacity 0.2s;
+            line-height: 1.4;
+        }
+
+        /* ------------------------ Axes Heatmap ------------------------ */
+        #graph-heatmap-sante svg text {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 10px;
+            fill: #2d3a4b;
+        }
+
+        #graph-heatmap-sante svg line,
+        #graph-heatmap-sante svg path {
+            stroke: #7b8794; /* couleur axes similaire scatter plot */
+        }
+
+        /* ------------------------ Menu déroulant ------------------------ */
+        #controls-sante select {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            padding: 6px 15px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #controls-sante select:hover {
+            border-color: #4a90e2;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -344,21 +404,31 @@
             </div>
         </section>
         <section class="section" id="tache3">
-            <div class="section-header">
-                <span class="section-label">Tâche 3</span>
-                <h2 class="section-title">Analyse libre</h2>
-                <p class="section-desc">
-                    Visualisation interactive au choix — besoin et type à définir.
-                </p>
-            </div>
-            <!-- TÂCHE 3 -->
-            <div class="card">
-                <span class="card-title">Visualisation libre (à compléter)</span>
-                <div id="graph-task3" class="viz-placeholder">
-                    Espace réservé — Tâche 3
-                </div>
-            </div>
-        </section>
+    <div class="section-header">
+        <span class="section-label">Tâche 3</span>
+        <h2 class="section-title">Santé, Précarité et Usure Professionnelle</h2>
+        <p class="section-desc">
+            Analyse de l'état de santé lors de la première année de retraite en relation avec le parcours professionnel passé.
+        </p>
+    </div>
+
+    <div class="card">
+        <span class="card-title">Visuel 1 : Corrélation Santé ↔ Précarité</span>
+        <div id="controls-sante" style="margin-bottom: 10px;">Filtrer par année : </div>
+        <div id="graph-scatter-sante"></div>
+        <div style="font-size: 0.8rem; color: #7b8794; font-style: italic;">
+            Note : La taille des bulles représente la <strong>durée moyenne en emploi</strong>.
+        </div>
+    </div>
+
+    <div class="card">
+        <span class="card-title">Visuel 2 : Évolution de l'usure physique (Heatmap)</span>
+        <div id="graph-heatmap-sante"></div>
+        <div style="font-size: 0.85rem; line-height: 1.5; background: #fff4f4; padding: 15px; border-radius: 8px; border-left: 5px solid #e63946;">
+            <strong>Analyse :</strong> Plus la couleur tend vers le rouge, plus la proportion de retraités "fortement limités" physiquement est élevée dès l'entrée en retraite. On observe si certaines CSP s'usent plus vite avec le temps.
+        </div>
+    </div>
+</section>
     </main>
 
     <footer>
@@ -384,6 +454,7 @@
     <script src="global.js"></script>
     <script src="csp.js"></script>
     <script src="tache2.js"></script>
+    <script src="tache3.js"></script>
 </body>
 
 </html>

@@ -178,18 +178,21 @@
             font-style: italic;
             min-height: 300px;
         }
+
         #graph-scatter-sante {
             background: repeating-linear-gradient(-45deg,
-            transparent, transparent 8px,
-            rgba(0, 0, 0, 0.01) 8px, rgba(0, 0, 0, 0.01) 16px);
+                    transparent, transparent 8px,
+                    rgba(0, 0, 0, 0.01) 8px, rgba(0, 0, 0, 0.01) 16px);
         }
+
         #graph-scatter-sante svg {
             background: transparent;
         }
+
         #graph-heatmap-sante {
             background: repeating-linear-gradient(-45deg,
-             transparent, transparent 8px,
-             rgba(0, 0, 0, 0.01) 8px, rgba(0, 0, 0, 0.01) 16px);
+                    transparent, transparent 8px,
+                    rgba(0, 0, 0, 0.01) 8px, rgba(0, 0, 0, 0.01) 16px);
         }
 
         #graph-heatmap-sante svg {
@@ -233,22 +236,24 @@
             border-top: 1px solid var(--border);
             margin-top: 16px;
         }
-         #analyse-panel {
+
+        #analyse-panel {
             background: #ffffff;
             border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             border-left: 6px solid #4a90e2;
             margin-top: 25px;
         }
 
         #analyse-content strong {
-             color: #2d3a4b;
+            color: #2d3a4b;
         }
 
         #analyse-content ul li {
-             margin-bottom: 8px;
+            margin-bottom: 8px;
         }
+
         /* ------------------------ Tooltip Heatmap ------------------------ */
         .tooltip-hm {
             font-family: 'DM Sans', sans-serif;
@@ -258,7 +263,7 @@
             border: 1px solid #ccc;
             border-radius: 8px;
             padding: 8px 12px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
             pointer-events: none;
             transition: opacity 0.2s;
             line-height: 1.4;
@@ -273,7 +278,8 @@
 
         #graph-heatmap-sante svg line,
         #graph-heatmap-sante svg path {
-            stroke: #7b8794; /* couleur axes similaire scatter plot */
+            stroke: #7b8794;
+            /* couleur axes similaire scatter plot */
         }
 
         /* ------------------------ Menu déroulant ------------------------ */
@@ -290,7 +296,7 @@
 
         #controls-sante select:hover {
             border-color: #4a90e2;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -393,42 +399,48 @@
             <div class="card">
                 <span class="card-title">Nuage de points / Scatter plot — Profils CSP</span>
                 <div id="graph-scatter" class="viz-placeholder">
-                    Visualisation scatter plot 
+                    Visualisation scatter plot
                 </div>
                 <div id="top3" style="margin-top:20px;"></div>
-                <div id="analyse-panel" style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border-left: 5px solid #4a90e2;">
-                    <h4 style="margin-top:0; color:#2d3a4b; font-size:1.1rem;"> Analyse des groupes et cas particuliers</h4>
+                <div id="analyse-panel"
+                    style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border-left: 5px solid #4a90e2;">
+                    <h4 style="margin-top:0; color:#2d3a4b; font-size:1.1rem;"> Analyse des groupes et cas particuliers
+                    </h4>
                     <div id="analyse-content" style="font-size: 0.9rem; line-height: 1.5; color: #444;">
                     </div>
                 </div>
             </div>
         </section>
         <section class="section" id="tache3">
-    <div class="section-header">
-        <span class="section-label">Tâche 3</span>
-        <h2 class="section-title">Santé, Précarité et Usure Professionnelle</h2>
-        <p class="section-desc">
-            Analyse de l'état de santé lors de la première année de retraite en relation avec le parcours professionnel passé.
-        </p>
-    </div>
+            <div class="section-header">
+                <span class="section-label">Tâche 3</span>
+                <h2 class="section-title">Santé, Précarité et Usure Professionnelle</h2>
+                <p class="section-desc">
+                    Analyse de l'état de santé lors de la première année de retraite en relation avec le parcours
+                    professionnel passé.
+                </p>
+            </div>
 
-    <div class="card">
-        <span class="card-title">Visuel 1 : Corrélation Santé ↔ Précarité</span>
-        <div id="controls-sante" style="margin-bottom: 10px;">Filtrer par année : </div>
-        <div id="graph-scatter-sante"></div>
-        <div style="font-size: 0.8rem; color: #7b8794; font-style: italic;">
-            Note : La taille des bulles représente la <strong>durée moyenne en emploi</strong>.
-        </div>
-    </div>
+            <div class="card">
+                <span class="card-title">Visuel 1 : Corrélation Santé ↔ Précarité</span>
+                <div id="controls-sante" style="margin-bottom: 10px;">Filtrer par année : </div>
+                <div id="graph-scatter-sante"></div>
+                <div style="font-size: 0.8rem; color: #7b8794; font-style: italic;">
+                    Note : La taille des bulles représente la <strong>durée moyenne en emploi</strong>.
+                </div>
+            </div>
 
-    <div class="card">
-        <span class="card-title">Visuel 2 : Évolution de l'usure physique (Heatmap)</span>
-        <div id="graph-heatmap-sante"></div>
-        <div style="font-size: 0.85rem; line-height: 1.5; background: #fff4f4; padding: 15px; border-radius: 8px; border-left: 5px solid #e63946;">
-            <strong>Analyse :</strong> Plus la couleur tend vers le rouge, plus la proportion de retraités "fortement limités" physiquement est élevée dès l'entrée en retraite. On observe si certaines CSP s'usent plus vite avec le temps.
-        </div>
-    </div>
-</section>
+            <div class="card">
+                <span class="card-title">Visuel 2 : Évolution de l'usure physique (Heatmap)</span>
+                <div id="graph-heatmap-sante"></div>
+                <div
+                    style="font-size: 0.85rem; line-height: 1.5; background: #fff4f4; padding: 15px; border-radius: 8px; border-left: 5px solid #e63946;">
+                    <strong>Analyse :</strong> Plus la couleur tend vers le rouge, plus la proportion de retraités
+                    "fortement limités" physiquement est élevée dès l'entrée en retraite. On observe si certaines CSP
+                    s'usent plus vite avec le temps.
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer>

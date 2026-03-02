@@ -14,12 +14,10 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
   );
   const color = d3.scaleOrdinal().domain(categories).range(d3.schemeTableau10);
 
-  let selectedYear = years[0];
+  let selectedYear = "all";
   let selectedCSP = null;
 
-  // =============================
   // GRAPHIQUE MULTI-LIGNES PAR CSP
-  // =============================
   const svg2 = d3
     .select("#graph-csp")
     .append("svg")
@@ -51,7 +49,6 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .attr("fill", "black")
     .text("Âge");
 
-  // Ligne verticale pour l'année sélectionnée
   const verticalLine = svg2
     .append("line")
     .attr("y1", 0)
@@ -62,10 +59,16 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .attr("opacity", 0.7);
 
   function updateVerticalLine() {
-    verticalLine.attr("x1", x2(selectedYear)).attr("x2", x2(selectedYear));
+    if (selectedYear === "all") {
+      verticalLine.attr("opacity", 0);
+    } else {
+      verticalLine
+        .attr("opacity", 0.7)
+        .attr("x1", x2(selectedYear))
+        .attr("x2", x2(selectedYear));
+    }
   }
 
-  // Préparation des données par CSP
   const dataByCSP = categories.map((cat) => ({
     category: cat,
     values: years
@@ -84,7 +87,6 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .x((d) => x2(d.annee))
     .y((d) => y2(d.age));
 
-  // Fond cliquable pour désélectionner la CSP
   svg2
     .append("rect")
     .attr("width", width)
@@ -97,7 +99,6 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       updateBarChart(selectedYear);
     });
 
-  // Lignes par CSP
   const lines = svg2
     .selectAll(".line-csp")
     .data(dataByCSP)
@@ -116,7 +117,6 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       updateBarChart(selectedYear);
     });
 
-  // Points interactifs sur les lignes
   svg2
     .selectAll(".dots-group")
     .data(dataByCSP)
@@ -173,17 +173,36 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     }
   }
 
-  // =============================
   // BOUTONS DE SÉLECTION D'ANNÉE
-  // =============================
   const yearContainer = d3.select("#year-selector");
 
   yearContainer
-    .selectAll(".year-btn")
+    .append("div")
+    .attr("class", "year-btn year-btn-all")
+    .text("Tous")
+    .style("display", "inline-block")
+    .style("padding", "6px 14px")
+    .style("margin", "4px")
+    .style("cursor", "pointer")
+    .style("border-radius", "6px")
+    .style("border", "2px solid steelblue")
+    .style("font-size", "14px")
+    .style("font-weight", "bold")
+    .style("background", "steelblue")
+    .style("color", "white")
+    .on("click", function () {
+      selectedYear = "all";
+      updateYearButtons();
+      updateVerticalLine();
+      updateBarChart(selectedYear);
+    });
+
+  yearContainer
+    .selectAll(".year-btn-item")
     .data(years)
     .enter()
     .append("div")
-    .attr("class", "year-btn")
+    .attr("class", "year-btn year-btn-item")
     .text((d) => d)
     .style("display", "inline-block")
     .style("padding", "6px 14px")
@@ -193,8 +212,8 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .style("border", "2px solid #ccc")
     .style("font-size", "14px")
     .style("font-weight", "bold")
-    .style("background", (d) => (d === selectedYear ? "steelblue" : "#f5f5f5"))
-    .style("color", (d) => (d === selectedYear ? "white" : "black"))
+    .style("background", "#f5f5f5")
+    .style("color", "black")
     .on("click", function (event, d) {
       selectedYear = d;
       updateYearButtons();
@@ -204,7 +223,13 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
 
   function updateYearButtons() {
     yearContainer
-      .selectAll(".year-btn")
+      .select(".year-btn-all")
+      .style("background", selectedYear === "all" ? "steelblue" : "#f5f5f5")
+      .style("color", selectedYear === "all" ? "white" : "black")
+      .style("border-color", selectedYear === "all" ? "steelblue" : "#ccc");
+
+    yearContainer
+      .selectAll(".year-btn-item")
       .style("background", (d) =>
         d === selectedYear ? "steelblue" : "#f5f5f5",
       )
@@ -214,9 +239,6 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       );
   }
 
-  // =============================
-  // BOUTONS DE SÉLECTION DE CSP
-  // =============================
   const cspContainer = d3.select("#csp-selector");
   const categoriesLabels = categories.map((cat) => ({
     full: cat,
@@ -299,9 +321,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       );
   }
 
-  // =============================
   // BAR CHART — DÉTAIL PAR ANNÉE
-  // =============================
   const barMargin = { top: 20, right: 20, bottom: 160, left: 50 };
   const barWidth = 420 - barMargin.left - barMargin.right;
   const barHeight = 400 - barMargin.top - barMargin.bottom;
@@ -367,7 +387,23 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .attr("fill", "#333");
 
   function updateBarChart(year) {
-    const filtered = data.filter((d) => d.annee_num === year);
+    let filtered;
+
+    if (year === "all") {
+      filtered = categories.map((cat) => {
+        const catData = data.filter(
+          (d) => d["Catégorie socioprofessionnelle"] === cat,
+        );
+        const avgAge =
+          catData.reduce((sum, d) => sum + d.age_num, 0) / catData.length;
+        return {
+          "Catégorie socioprofessionnelle": cat,
+          age_num: avgAge,
+        };
+      });
+    } else {
+      filtered = data.filter((d) => d.annee_num === year);
+    }
 
     svgBar
       .selectAll(".bar-csp")
@@ -408,10 +444,12 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
         return entry ? entry.age_num.toFixed(1) : "";
       });
 
-    d3.select("#yearLabel").text(year);
+    d3.select("#yearLabel").text(
+      year === "all" ? "Moyenne toutes années" : year,
+    );
   }
 
-  // Initialisation
   updateVerticalLine();
+  updateYearButtons();
   updateBarChart(selectedYear);
 });

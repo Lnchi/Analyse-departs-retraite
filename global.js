@@ -1,9 +1,9 @@
-// Dimensions partagées entre les graphiques
+// Dimensions des graphiques
 const margin = { top: 50, right: 50, bottom: 50, left: 60 };
 const width = 650 - margin.left - margin.right;
 const height = 400 - margin.top - margin.bottom;
 
-// Tooltip global partagé
+// Tooltip global
 const tooltip = d3
   .select("body")
   .append("div")
@@ -18,7 +18,7 @@ const tooltip = d3
   .style("font-family", "sans-serif")
   .style("font-size", "14px");
 
-// Chargement des données et graphique global
+// Chargement des données
 d3.dsv(";", "departretraite_parcsp.csv")
   .then((data) => {
     // Détection automatique de la colonne CSP
@@ -55,7 +55,7 @@ d3.dsv(";", "departretraite_parcsp.csv")
       (d) => d.age_num,
     );
 
-    // Graphique ligne global
+    // Graphique ligne
     const svg1 = d3
       .select("#graph-global")
       .append("svg")

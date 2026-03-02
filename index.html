@@ -161,13 +161,21 @@
             align-items: stretch;
         }
 
-        .viz-placeholder {
-            flex: 1;
+        /* Classe utilitaire pour fond hachuré */
+        .striped-bg {
             background: repeating-linear-gradient(-45deg,
                     transparent, transparent 8px,
                     rgba(0, 0, 0, 0.01) 8px, rgba(0, 0, 0, 0.01) 16px);
+        }
+
+        /* Classe utilitaire pour bordure pointillée */
+        .dashed-border {
             border: 1px dashed var(--border);
             border-radius: 8px;
+        }
+
+        .viz-placeholder {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -179,22 +187,7 @@
             min-height: 300px;
         }
 
-        #graph-scatter-sante {
-            background: repeating-linear-gradient(-45deg,
-                    transparent, transparent 8px,
-                    rgba(0, 0, 0, 0.01) 8px, rgba(0, 0, 0, 0.01) 16px);
-        }
-
-        #graph-scatter-sante svg {
-            background: transparent;
-        }
-
-        #graph-heatmap-sante {
-            background: repeating-linear-gradient(-45deg,
-                    transparent, transparent 8px,
-                    rgba(0, 0, 0, 0.01) 8px, rgba(0, 0, 0, 0.01) 16px);
-        }
-
+        #graph-scatter-sante svg,
         #graph-heatmap-sante svg {
             background: transparent;
         }
@@ -215,11 +208,6 @@
 
         #csp {
             width: 100%;
-            background: repeating-linear-gradient(-45deg,
-                    transparent, transparent 8px,
-                    rgba(0, 0, 0, 0.01) 8px, rgba(0, 0, 0, 0.01) 16px);
-            border: 1px dashed var(--border);
-            border-radius: 8px;
             padding: 16px;
         }
 
@@ -322,13 +310,11 @@
             </div>
 
             <div class="row">
-                <!-- Graphique global -->
                 <div class="card">
                     <span class="card-title">Âge moyen de départ à la retraite</span>
-                    <div id="graph-global" class="viz-placeholder"></div>
+                    <div id="graph-global" class="viz-placeholder striped-bg dashed-border"></div>
                 </div>
 
-                <!-- Panneau de détails -->
                 <div class="card">
                     <span class="card-title">Détails de l'année sélectionnée</span>
                     <div id="panel-details"
@@ -360,14 +346,12 @@
             </div>
 
             <div class="row">
-                <!-- Graphique CSP multi-lignes -->
                 <div class="card">
                     <span class="card-title">Âge de départ par catégorie socioprofessionnelle</span>
-                    <div id="graph-csp" class="viz-placeholder"></div>
+                    <div id="graph-csp" class="viz-placeholder striped-bg dashed-border"></div>
                     <div id="csp-selector" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;"></div>
                 </div>
 
-                <!-- Bar chart + sélecteur d'années -->
                 <div class="card" style="align-items:center; text-align:center; gap:20px;">
                     <span class="card-title">Détail CSP — Année sélectionnée</span>
                     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
@@ -376,7 +360,7 @@
                     </div>
                     <div id="year-selector" style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center;">
                     </div>
-                    <div id="csp"></div>
+                    <div id="csp" class="striped-bg dashed-border"></div>
                 </div>
             </div>
         </section>
@@ -393,19 +377,19 @@
             </div>
             <div class="card">
                 <span class="card-title">Nuage de points / Scatter plot — Profils CSP</span>
-                <div id="graph-scatter" class="viz-placeholder">
+                <div id="graph-scatter" class="viz-placeholder striped-bg dashed-border">
                     Visualisation scatter plot
                 </div>
                 <div id="top3" style="margin-top:20px;"></div>
-                <div id="analyse-panel"
-                    style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border-left: 5px solid #4a90e2;">
-                    <h4 style="margin-top:0; color:#2d3a4b; font-size:1.1rem;"> Analyse des groupes et cas particuliers
+                <div id="analyse-panel">
+                    <h4 style="margin-top:0; color:#2d3a4b; font-size:1.1rem;">Analyse des groupes et cas particuliers
                     </h4>
                     <div id="analyse-content" style="font-size: 0.9rem; line-height: 1.5; color: #444;">
                     </div>
                 </div>
             </div>
         </section>
+
         <!-- TÂCHE 3 -->
         <section class="section" id="tache3">
             <div class="section-header">
@@ -420,7 +404,7 @@
             <div class="card">
                 <span class="card-title">Visuel 1 : Corrélation Santé ↔ Précarité</span>
                 <div id="controls-sante" style="margin-bottom: 10px;">Filtrer par année : </div>
-                <div id="graph-scatter-sante"></div>
+                <div id="graph-scatter-sante" class="striped-bg"></div>
                 <div style="font-size: 0.8rem; color: #7b8794; font-style: italic;">
                     Note : La taille des bulles représente la <strong>durée moyenne en emploi</strong>.
                 </div>
@@ -428,7 +412,7 @@
 
             <div class="card">
                 <span class="card-title">Visuel 2 : Évolution de l'usure physique (Heatmap)</span>
-                <div id="graph-heatmap-sante"></div>
+                <div id="graph-heatmap-sante" class="striped-bg"></div>
                 <div
                     style="font-size: 0.85rem; line-height: 1.5; background: #fff4f4; padding: 15px; border-radius: 8px; border-left: 5px solid #e63946;">
                     <strong>Analyse :</strong> Plus la couleur tend vers le rouge, plus la proportion de retraités

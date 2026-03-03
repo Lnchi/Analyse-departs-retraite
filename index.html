@@ -5,11 +5,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Départ à la Retraite — Analyse Visuelle</title>
+    
+    <!-- On charge les polices Google pour un design plus élégant -->
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
         rel="stylesheet" />
+    
+    <!-- On charge la bibliothèque D3.js pour créer les graphiques -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    
     <style>
+        /* On définit les couleurs et espacements utilisés partout */
         :root {
             --bg: #f7f9fc;
             --surface: #ffffff;
@@ -22,6 +28,7 @@
             --gap: 24px;
         }
 
+        /* On réinitialise les marges par défaut du navigateur */
         *,
         *::before,
         *::after {
@@ -30,6 +37,7 @@
             padding: 0;
         }
 
+        /* Style général de la page */
         body {
             font-family: 'DM Sans', sans-serif;
             background: var(--bg);
@@ -37,6 +45,7 @@
             min-height: 100vh;
         }
 
+        /* En-tête du site avec titre et description */
         header {
             border-bottom: 1px solid var(--border);
             padding: 28px 48px;
@@ -46,6 +55,7 @@
             gap: 16px;
         }
 
+        /* Titre principal avec police serif élégante */
         header h1 {
             font-family: 'DM Serif Display', serif;
             font-size: clamp(1.6rem, 3vw, 2.4rem);
@@ -53,6 +63,7 @@
             line-height: 1.1;
         }
 
+        /* Sous-titre descriptif */
         header p {
             font-size: 0.85rem;
             color: var(--text-dim);
@@ -61,6 +72,7 @@
             line-height: 1.5;
         }
 
+        /* Barre de navigation avec les onglets */
         nav {
             display: flex;
             gap: 4px;
@@ -69,6 +81,7 @@
             background: var(--surface);
         }
 
+        /* Style des liens de navigation */
         nav a {
             text-decoration: none;
             color: var(--text-dim);
@@ -81,15 +94,18 @@
             transition: color 0.2s, border-color 0.2s;
         }
 
+        /* Au survol d'un onglet */
         nav a:hover {
             color: var(--text);
         }
 
+        /* Style de l'onglet actif */
         nav a.active {
             color: var(--accent);
             border-bottom-color: var(--accent);
         }
 
+        /* Conteneur principal de la page */
         main {
             padding: 40px 48px;
             display: flex;
@@ -97,22 +113,26 @@
             gap: 48px;
         }
 
+        /* Les sections sont cachées par défaut */
         .section {
             display: none;
             flex-direction: column;
             gap: var(--gap);
         }
 
+        /* Seule la section active est visible */
         .section.active {
             display: flex;
         }
 
+        /* En-tête de chaque section */
         .section-header {
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
 
+        /* Petit label au-dessus du titre */
         .section-label {
             font-size: 0.72rem;
             letter-spacing: 0.12em;
@@ -121,6 +141,7 @@
             font-weight: 500;
         }
 
+        /* Titre de la section */
         .section-title {
             font-family: 'DM Serif Display', serif;
             font-size: 1.7rem;
@@ -128,6 +149,7 @@
             line-height: 1.2;
         }
 
+        /* Description de la section */
         .section-desc {
             font-size: 0.88rem;
             color: var(--text-dim);
@@ -136,6 +158,7 @@
             margin-top: 4px;
         }
 
+        /* Carte blanche avec bordure arrondie */
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -146,6 +169,7 @@
             gap: 16px;
         }
 
+        /* Titre de carte */
         .card-title {
             font-size: 0.78rem;
             letter-spacing: 0.08em;
@@ -154,6 +178,7 @@
             font-weight: 500;
         }
 
+        /* Disposition en 2 colonnes (2/3 - 1/3) */
         .row {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -161,19 +186,20 @@
             align-items: stretch;
         }
 
-        /* Classe utilitaire pour fond hachuré */
+        /* Fond avec motif hachuré léger */
         .striped-bg {
             background: repeating-linear-gradient(-45deg,
                     transparent, transparent 8px,
                     rgba(0, 0, 0, 0.01) 8px, rgba(0, 0, 0, 0.01) 16px);
         }
 
-        /* Classe utilitaire pour bordure pointillée */
+        /* Bordure en pointillés */
         .dashed-border {
             border: 1px dashed var(--border);
             border-radius: 8px;
         }
 
+        /* Zone de graphique en attente de contenu */
         .viz-placeholder {
             flex: 1;
             display: flex;
@@ -187,11 +213,13 @@
             min-height: 300px;
         }
 
+        /* Fond transparent pour les SVG de santé */
         #graph-scatter-sante svg,
         #graph-heatmap-sante svg {
             background: transparent;
         }
 
+        /* Hauteur minimale pour les conteneurs de graphiques */
         #graph-global,
         #graph-csp,
         #graph-scatter,
@@ -199,6 +227,7 @@
             min-height: 320px;
         }
 
+        /* Style du label d'année affiché */
         #yearLabel {
             font-family: 'DM Serif Display', serif;
             font-size: 1.2rem;
@@ -206,6 +235,7 @@
             min-width: 48px;
         }
 
+        /* Conteneur du graphique en barres */
         #csp {
             width: 100%;
             padding: 16px;
@@ -215,6 +245,7 @@
             display: block;
         }
 
+        /* Pied de page */
         footer {
             text-align: center;
             padding: 28px;
@@ -224,6 +255,7 @@
             margin-top: 16px;
         }
 
+        /* Panneau d'analyse avec bordure bleue à gauche */
         #analyse-panel {
             background: #ffffff;
             border-radius: 12px;
@@ -241,6 +273,7 @@
             margin-bottom: 8px;
         }
 
+        /* Style de la bulle d'info pour la heatmap */
         .tooltip-hm {
             font-family: 'DM Sans', sans-serif;
             font-size: 0.85rem;
@@ -255,17 +288,20 @@
             line-height: 1.4;
         }
 
+        /* Style du texte dans la heatmap */
         #graph-heatmap-sante svg text {
             font-family: 'DM Sans', sans-serif;
             font-size: 10px;
             fill: #2d3a4b;
         }
 
+        /* Style des lignes et chemins dans la heatmap */
         #graph-heatmap-sante svg line,
         #graph-heatmap-sante svg path {
             stroke: #7b8794;
         }
 
+        /* Style du menu déroulant de sélection d'année */
         #controls-sante select {
             font-family: 'DM Sans', sans-serif;
             font-size: 0.85rem;
@@ -285,12 +321,14 @@
 </head>
 
 <body>
+    <!-- En-tête avec titre principal -->
     <header>
         <h1>Départ à la Retraite<br /><em>en France</em></h1>
         <p>Analyse visuelle de l'âge de départ à la retraite<br />
             par catégorie socioprofessionnelle · 2013–2020</p>
     </header>
 
+    <!-- Barre de navigation avec les 3 onglets -->
     <nav>
         <a href="#" class="active" data-section="tache1">Tâche 1 — Tendances</a>
         <a href="#" data-section="tache2">Tâche 2 — Profils CSP</a>
@@ -298,7 +336,7 @@
     </nav>
 
     <main>
-        <!-- TÂCHE 1 -->
+        <!-- SECTION 1 : Tendances générales -->
         <section class="section active" id="tache1">
             <div class="section-header">
                 <span class="section-label">Tâche 1</span>
@@ -309,6 +347,7 @@
                 </p>
             </div>
 
+            <!-- Graphique global + panneau de détails -->
             <div class="row">
                 <div class="card">
                     <span class="card-title">Âge moyen de départ à la retraite</span>
@@ -345,6 +384,7 @@
                 </div>
             </div>
 
+            <!-- Graphique par CSP + graphique en barres -->
             <div class="row">
                 <div class="card">
                     <span class="card-title">Âge de départ par catégorie socioprofessionnelle</span>
@@ -365,7 +405,7 @@
             </div>
         </section>
 
-        <!-- TÂCHE 2 -->
+        <!-- SECTION 2 : Profils des CSP -->
         <section class="section" id="tache2">
             <div class="section-header">
                 <span class="section-label">Tâche 2</span>
@@ -390,7 +430,7 @@
             </div>
         </section>
 
-        <!-- TÂCHE 3 -->
+        <!-- SECTION 3 : Santé et précarité -->
         <section class="section" id="tache3">
             <div class="section-header">
                 <span class="section-label">Tâche 3</span>
@@ -401,6 +441,7 @@
                 </p>
             </div>
 
+            <!-- Graphique scatter santé/précarité -->
             <div class="card">
                 <span class="card-title">Visuel 1 : Corrélation Santé ↔ Précarité</span>
                 <div id="controls-sante" style="margin-bottom: 10px;">Filtrer par année : </div>
@@ -410,6 +451,7 @@
                 </div>
             </div>
 
+            <!-- Heatmap de l'usure physique -->
             <div class="card">
                 <span class="card-title">Visuel 2 : Évolution de l'usure physique (Heatmap)</span>
                 <div id="graph-heatmap-sante" class="striped-bg"></div>
@@ -423,12 +465,13 @@
         </section>
     </main>
 
+    <!-- Pied de page avec source des données -->
     <footer>
         Données : departretraite_parcsp.csv · Source : statistiques publiques françaises
     </footer>
 
     <script>
-        // Navigation par onglets
+        // Gestion du clic sur les onglets de navigation
         const navLinks = document.querySelectorAll('nav a');
         const sections = document.querySelectorAll('.section');
 
@@ -436,13 +479,17 @@
             link.addEventListener('click', e => {
                 e.preventDefault();
                 const target = link.dataset.section;
+                // On retire la classe "active" de tous les liens
                 navLinks.forEach(l => l.classList.remove('active'));
+                // On l'ajoute au lien cliqué
                 link.classList.add('active');
+                // On affiche la section correspondante
                 sections.forEach(s => s.classList.toggle('active', s.id === target));
             });
         });
     </script>
 
+    <!-- On charge tous les scripts JavaScript pour les visualisations -->
     <script src="tache1_1.js"></script>
     <script src="tache1_2.js"></script>
     <script src="tache2.js"></script>

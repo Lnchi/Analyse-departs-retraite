@@ -1,44 +1,47 @@
+// On charge le fichier CSV et on démarre
 d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
-  // 1. NETTOYAGE ET SIMPLIFICATION
+  
+  // On nettoie les données pour les rendre utilisables
   data.forEach((d) => {
     d.annee = +d.annee;
     d.age = +d["Âge conjoncturel de départ à la retraite"].replace(",", ".");
     d.csp = d["Catégorie socioprofessionnelle"];
   });
 
+  // On extrait les années et catégories uniques + on prépare les couleurs
   const years = Array.from(new Set(data.map((d) => d.annee))).sort();
   const categories = Array.from(new Set(data.map((d) => d.csp)));
   const color = d3.scaleOrdinal().domain(categories).range(d3.schemeTableau10);
 
-  // OPTIMISATION : Pré-calcul des moyennes
+  // On calcule une fois pour toutes les moyennes par CSP (plus rapide après)
   const avgDataByCSP = categories.map((cat) => {
     const catData = data.filter((d) => d.csp === cat);
     return { csp: cat, age: d3.mean(catData, (d) => d.age) };
   });
 
+  // On récupère l'élément HTML qui affiche l'année sélectionnée
   const yearLabelDOM = d3.select("#yearLabel");
 
+  // Variables pour savoir quelle année et quelles CSP sont sélectionnées
   let selectedYear = "all";
-
-  // NOUVEAU : Un tableau pour la multi-sélection (vide = "Toutes les CSP")
   let selectedCSPs = [];
 
-  // --- LOGIQUE DE MULTI-SÉLECTION ---
+  // Fonction pour ajouter/retirer une CSP de la sélection au clic
   function toggleCSP(csp) {
     if (selectedCSPs.length === 0) {
-      // Si "Toutes" était actif, on bascule sur celle qu'on vient de cliquer
+      // Si rien n'était sélectionné, on sélectionne celle-ci
       selectedCSPs = [csp];
     } else {
       if (selectedCSPs.includes(csp)) {
-        // Si elle y est déjà, on l'enlève
+        // Si elle est déjà sélectionnée, on la retire
         selectedCSPs = selectedCSPs.filter((c) => c !== csp);
       } else {
-        // Sinon, on l'ajoute à la sélection
+        // Sinon on l'ajoute
         selectedCSPs.push(csp);
       }
     }
 
-    // Si tout a été désélectionné OU si tout a été sélectionné manuellement -> on repasse en "All"
+    // Si on a tout décoché ou tout coché, on revient à "Toutes"
     if (
       selectedCSPs.length === 0 ||
       selectedCSPs.length === categories.length
@@ -46,12 +49,13 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       selectedCSPs = [];
     }
 
+    // On met à jour l'affichage
     updateHighlight();
     updateCSPButtons();
     updateBarChart(selectedYear);
   }
 
-  // --- GRAPHIQUE MULTI-LIGNES PAR CSP ---
+  // On crée le conteneur SVG pour le graphique multi-lignes
   const svg2 = d3
     .select("#graph-csp")
     .append("svg")
@@ -60,9 +64,11 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
+  // On définit les échelles pour positionner les éléments
   const x2 = d3.scaleLinear().domain(d3.extent(years)).range([0, width]);
   const y2 = d3.scaleLinear().domain([58, 66]).range([height, 0]);
 
+  // On dessine l'axe horizontal (années)
   svg2
     .append("g")
     .attr("transform", `translate(0,${height})`)
@@ -73,6 +79,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .attr("fill", "black")
     .text("Année");
 
+  // On dessine l'axe vertical (âge)
   svg2
     .append("g")
     .call(d3.axisLeft(y2))
@@ -83,6 +90,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .attr("fill", "black")
     .text("Âge");
 
+  // On crée une ligne verticale qui indiquera l'année sélectionnée
   const verticalLine = svg2
     .append("line")
     .attr("y1", 0)
@@ -92,6 +100,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .attr("stroke-dasharray", "5,4")
     .attr("opacity", 0.7);
 
+  // Fonction qui positionne ou cache la ligne verticale selon l'année
   function updateVerticalLine() {
     if (selectedYear === "all") {
       verticalLine.attr("opacity", 0);
@@ -103,6 +112,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     }
   }
 
+  // On organise les données : une ligne par CSP avec toutes ses années
   const dataByCSP = categories.map((cat) => ({
     category: cat,
     values: years
@@ -113,23 +123,26 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       .filter((d) => d.age !== null),
   }));
 
+  // On prépare le générateur de ligne
   const lineGen = d3
     .line()
     .x((d) => x2(d.annee))
     .y((d) => y2(d.age));
 
+  // On ajoute un fond transparent pour détecter les clics dans le vide
   svg2
     .append("rect")
     .attr("width", width)
     .attr("height", height)
     .attr("fill", "transparent")
     .on("click", () => {
-      selectedCSPs = []; // Reset sur un clic dans le vide
+      selectedCSPs = []; // On désélectionne tout
       updateHighlight();
       updateCSPButtons();
       updateBarChart(selectedYear);
     });
 
+  // On dessine toutes les lignes (une par CSP)
   const lines = svg2
     .selectAll(".line-csp")
     .data(dataByCSP)
@@ -145,6 +158,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       toggleCSP(d.category);
     });
 
+  // On crée un groupe pour chaque CSP qui contiendra ses points
   const dotsGroups = svg2
     .selectAll(".dots-group")
     .data(dataByCSP)
@@ -152,6 +166,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .append("g")
     .attr("class", "dots-group");
 
+  // On ajoute les points sur chaque ligne
   const dots = dotsGroups
     .selectAll("circle")
     .data((d) => d.values.map((v) => ({ ...v, category: d.category })))
@@ -164,6 +179,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .attr("stroke", "white")
     .attr("stroke-width", 1.5)
     .style("cursor", "pointer")
+    // Au survol d'un point, on affiche les infos
     .on("mouseover", function (event, d) {
       tooltip.transition().duration(200).style("opacity", 1);
       tooltip
@@ -181,6 +197,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .on("mouseout", function () {
       tooltip.transition().duration(500).style("opacity", 0);
     })
+    // Au clic sur un point, on sélectionne cette année
     .on("click", function (event, d) {
       selectedYear = d.annee;
       updateVerticalLine();
@@ -188,11 +205,14 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       updateBarChart(selectedYear);
     });
 
+  // Fonction qui met en évidence les CSP sélectionnées
   function updateHighlight() {
     if (selectedCSPs.length === 0) {
+      // Si rien n'est sélectionné, tout est visible normalement
       lines.attr("stroke-width", 2.5).attr("opacity", 1);
       dots.attr("opacity", 1).attr("r", 4);
     } else {
+      // Sinon, on rend les CSP sélectionnées plus visibles
       lines
         .attr("stroke-width", (d) =>
           selectedCSPs.includes(d.category) ? 4 : 1.5,
@@ -204,9 +224,10 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     }
   }
 
-  // --- BOUTONS DE SÉLECTION D'ANNÉE ---
+  // On crée le conteneur pour les boutons d'année
   const yearContainer = d3.select("#year-selector");
 
+  // Le bouton "Tous" pour afficher toutes les années
   const btnYearAll = yearContainer
     .append("div")
     .attr("class", "year-btn year-btn-all")
@@ -228,6 +249,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       updateBarChart(selectedYear);
     });
 
+  // Les boutons individuels pour chaque année
   const btnYearItems = yearContainer
     .selectAll(".year-btn-item")
     .data(years)
@@ -252,6 +274,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       updateBarChart(selectedYear);
     });
 
+  // Fonction qui met à jour l'apparence des boutons d'année
   function updateYearButtons() {
     btnYearAll
       .style("background", selectedYear === "all" ? "steelblue" : "#f5f5f5")
@@ -268,12 +291,14 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       );
   }
 
+  // On prépare les labels des CSP (version courte sans numéro)
   const cspContainer = d3.select("#csp-selector");
   const categoriesLabels = categories.map((cat) => ({
     full: cat,
     short: cat.replace(/^\d+\s*-\s*/, ""),
   }));
 
+  // Le bouton "Toutes les CSP"
   const btnCspAll = cspContainer
     .append("div")
     .attr("class", "csp-btn csp-btn-all")
@@ -289,7 +314,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .style("background", "steelblue")
     .style("color", "white")
     .on("click", function () {
-      selectedCSPs = []; // Reset complet
+      selectedCSPs = []; // On désélectionne tout
       updateHighlight();
       updateCSPButtons();
       updateBarChart(selectedYear);
@@ -297,6 +322,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
 
   btnCspAll.append("span").text("Toutes les CSP");
 
+  // Les boutons individuels pour chaque CSP
   const btnCspItems = cspContainer
     .selectAll(".csp-btn-item")
     .data(categoriesLabels)
@@ -318,6 +344,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       toggleCSP(d.full);
     });
 
+  // On ajoute un carré de couleur + le texte dans chaque bouton CSP
   btnCspItems.each(function (d) {
     d3.select(this)
       .append("div")
@@ -329,6 +356,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     d3.select(this).append("span").text(d.short);
   });
 
+  // Fonction qui met à jour l'apparence des boutons CSP
   function updateCSPButtons() {
     btnCspAll
       .style("background", selectedCSPs.length === 0 ? "steelblue" : "#f5f5f5")
@@ -347,11 +375,12 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       );
   }
 
-  // --- BAR CHART — DÉTAIL PAR ANNÉE ---
+  // On configure les dimensions du graphique en barres
   const barMargin = { top: 20, right: 20, bottom: 160, left: 50 };
   const barWidth = 420 - barMargin.left - barMargin.right;
   const barHeight = 400 - barMargin.top - barMargin.bottom;
 
+  // On crée le conteneur SVG pour le graphique en barres
   const svgBar = d3
     .select("#csp")
     .append("svg")
@@ -360,6 +389,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .append("g")
     .attr("transform", `translate(${barMargin.left},${barMargin.top})`);
 
+  // On définit les échelles pour les barres
   const xBar = d3
     .scaleBand()
     .domain(categories)
@@ -367,6 +397,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .padding(0.25);
   const yBar = d3.scaleLinear().domain([58, 66]).range([barHeight, 0]);
 
+  // On dessine l'axe horizontal (CSP) avec labels inclinés
   svgBar
     .append("g")
     .attr("transform", `translate(0,${barHeight})`)
@@ -378,6 +409,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .style("text-anchor", "end")
     .style("font-size", "11px");
 
+  // On dessine l'axe vertical (âge moyen)
   svgBar
     .append("g")
     .call(d3.axisLeft(yBar).ticks(5))
@@ -389,6 +421,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .style("text-anchor", "middle")
     .text("Âge moyen de départ");
 
+  // On crée les barres (une par CSP)
   const bars = svgBar
     .selectAll(".bar-csp")
     .data(categories)
@@ -400,6 +433,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .attr("fill", (d) => color(d))
     .attr("rx", 3);
 
+  // On crée les étiquettes de valeur au-dessus des barres
   const barLabels = svgBar
     .selectAll(".bar-label")
     .data(categories)
@@ -412,11 +446,14 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .attr("font-weight", "bold")
     .attr("fill", "#333");
 
+  // Fonction qui met à jour le graphique en barres selon l'année
   function updateBarChart(year) {
+    // On filtre les données selon l'année (ou moyenne si "all")
     const filteredData =
       year === "all" ? avgDataByCSP : data.filter((d) => d.annee === year);
     const dataMap = new Map(filteredData.map((d) => [d.csp, d.age]));
 
+    // On anime les barres
     bars
       .transition()
       .duration(600)
@@ -429,6 +466,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
         dataMap.has(d) ? barHeight - yBar(dataMap.get(d)) : 0,
       );
 
+    // On anime les étiquettes
     barLabels
       .transition()
       .duration(600)
@@ -438,10 +476,11 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       .attr("y", (d) => (dataMap.has(d) ? yBar(dataMap.get(d)) - 4 : barHeight))
       .text((d) => (dataMap.has(d) ? dataMap.get(d).toFixed(1) : ""));
 
+    // On met à jour le titre avec l'année affichée
     yearLabelDOM.text(year === "all" ? "Moyenne toutes années" : year);
   }
 
-  // --- INITIALISATION ---
+  // On initialise tout au chargement
   updateVerticalLine();
   updateYearButtons();
   updateBarChart(selectedYear);

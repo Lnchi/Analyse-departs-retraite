@@ -332,7 +332,7 @@
     <nav>
         <a href="#" class="active" data-section="tache1">Tâche 1 — Tendances</a>
         <a href="#" data-section="tache2">Tâche 2 — Profils CSP</a>
-        <a href="#" data-section="tache3">Tâche 3 — Analyse libre</a>
+        <a href="#" data-section="tache3">Tâche 3 — Analyse Croisée</a>
     </nav>
 
     <main>
@@ -409,14 +409,14 @@
         <section class="section" id="tache2">
             <div class="section-header">
                 <span class="section-label">Tâche 2</span>
-                <h2 class="section-title">Profils des catégories socioprofessionnelles</h2>
+                <h2 class="section-title">Profils des catégories socioprofessionnelles (CSP)</h2>
                 <p class="section-desc">
                     Comparaison des CSP selon l'âge de départ, la proportion de retraités à 61 ans
                     et la durée moyenne sans emploi. Identification des groupes et cas particuliers.
                 </p>
             </div>
             <div class="card">
-                <span class="card-title">Nuage de points / Scatter plot — Profils CSP</span>
+                <span class="card-title">Analyse des Profils CSP</span>
                 <div id="graph-scatter" class="viz-placeholder striped-bg dashed-border">
                     Visualisation scatter plot
                 </div>
@@ -434,16 +434,15 @@
         <section class="section" id="tache3">
             <div class="section-header">
                 <span class="section-label">Tâche 3</span>
-                <h2 class="section-title">Santé, Précarité et Usure Professionnelle</h2>
+                <h2 class="section-title">Limitations fonctionnelles en première année de retraite et trajectoires professionnelles</h2>
                 <p class="section-desc">
-                    Analyse de l'état de santé lors de la première année de retraite en relation avec le parcours
-                    professionnel passé.
+                Analyse croisée de la proportion de personnes fortement limitées en fonction de la durée moyenne passée en emploi, selon la catégorie socioprofessionnelle et l’année.
                 </p>
             </div>
 
             <!-- Graphique scatter santé/précarité -->
             <div class="card">
-                <span class="card-title">Visuel 1 : Corrélation Santé ↔ Précarité</span>
+                <span class="card-title"> Corrélation limitations fonctionnelles ↔ durée moyenne sans emploi ni retraite</span>
                 <div id="controls-sante" style="margin-bottom: 10px;">Filtrer par année : </div>
                 <div id="graph-scatter-sante" class="striped-bg"></div>
                 <div style="font-size: 0.8rem; color: #7b8794; font-style: italic;">
@@ -453,13 +452,12 @@
 
             <!-- Heatmap de l'usure physique -->
             <div class="card">
-                <span class="card-title">Visuel 2 : Évolution de l'usure physique (Heatmap)</span>
+                <span class="card-title">Evolution des limitations fonctionnelles en première année de retraite par catégorie socioprofessionnelle (2013-2020) (Heatmap)</span>
                 <div id="graph-heatmap-sante" class="striped-bg"></div>
                 <div
                     style="font-size: 0.85rem; line-height: 1.5; background: #fff4f4; padding: 15px; border-radius: 8px; border-left: 5px solid #e63946;">
                     <strong>Analyse :</strong> Plus la couleur tend vers le rouge, plus la proportion de retraités
-                    "fortement limités" physiquement est élevée dès l'entrée en retraite. On observe si certaines CSP
-                    s'usent plus vite avec le temps.
+                    "fortement limités" physiquement est élevée dès l'entrée en retraite. On observe si la proportion de personnes fortement limitées augmente davantage dans certaines catégories socioprofessionnelles entre 2013 et 2020.
                 </div>
             </div>
         </section>

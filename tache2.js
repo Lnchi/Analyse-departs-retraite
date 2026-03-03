@@ -183,7 +183,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
         updateAnalyse(filtered, selectedYear); // On met à jour l'analyse
     }
 
-    // === LÉGENDE INTERACTIVE (Multi-lignes + clic pour filtrer) ===
+    // LÉGENDE INTERACTIVE (Multi-lignes + clic pour filtrer) 
 
 // Position du bouton “Tout afficher”
 const legendX = width + 35;
@@ -218,7 +218,7 @@ allBtn.append("text")
     .attr("fill", "#333")
     .text("Tout afficher");
 
-// 2️⃣ Catégories
+// Catégories
 const categoriesYStart = 30; // espace entre le bouton et la première catégorie
 categories.forEach((cat, i) => {
     const row = legendGroup.append("g")

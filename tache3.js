@@ -1,6 +1,4 @@
-// ============================================================
-// TÂCHE 3 : SANTÉ (ANNÉE 1 RETRAITE) ET PARCOURS PROFESSIONNEL
-// ============================================================
+// TACHE 3 : Analyse croisée de la proportion de personnes fortement limitées à la retraite en fonction de la durée moyenne passée en emploi et hors emploi, selon la catégorie socioprofessionnelle et l’année.
 
 // Fonction utilitaire pour couper le texte en deux lignes proprement
 function splitText(text, maxLength = 25) {
@@ -29,21 +27,19 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       "",
     );
   });
-
+  // 2. Préparation des données pour le graphique
   const categories = [...new Set(data.map((d) => d.csp_clean))].sort();
   const annees = [...new Set(data.map((d) => d.annee))].sort();
   const color = d3.scaleOrdinal().domain(categories).range(d3.schemeTableau10);
 
-  // ============================================================
-  // VISUEL 1 : SCATTER PLOT Santé ↔ Sans emploi (avec légende interactive)
-  // ============================================================
 
+  // SCATTER PLOT 
+  // 2.1. Création de la échelle x et y
   const margin = { top: 40, right: 300, bottom: 60, left: 70 };
   const width = 1000 - margin.left - margin.right;
   const height = 450 - margin.top - margin.bottom;
-
+ 
   d3.select("#graph-scatter-sante").style("min-height", "450px");
-
   const svg = d3
     .select("#graph-scatter-sante")
     .html("")
@@ -58,7 +54,8 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Rect transparent derrière tout pour clic extérieur
+  // Rect transparent derrière tout pour clic extérieur 
+  // Pour capter les clics en dehors des bulles et réinitialiser.
   chart
     .append("rect")
     .attr("width", width)
@@ -79,7 +76,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     });
 
   // Échelles
-  const x = d3
+  const x = d3 
     .scaleLinear()
     .domain([0, d3.max(data, (d) => d.sante_limitee)])
     .nice()
@@ -119,7 +116,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .style("font-weight", "bold")
     .text("Durée moyenne sans emploi (Années)");
 
-  // Lignes de moyennes
+  // Lignes de moyennes : interpréter visuellement les groupes
   const meanSante = d3.mean(data, (d) => d.sante_limitee);
   const meanSansEmp = d3.mean(data, (d) => d.duree_sans_emploi);
 
@@ -141,7 +138,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .attr("stroke", "#ccc")
     .attr("stroke-dasharray", "4");
 
-  // Menu déroulant
+  // Menu déroulant : Filtrage par année :
   const selectDiv = d3.select("#controls-sante").html("");
   selectDiv
     .append("label")
@@ -174,11 +171,11 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       selectedYear === "Toutes"
         ? data
         : data.filter((d) => d.annee == selectedYear);
-
+    // Création des cercles
     const circles = chart
       .selectAll("circle.dot")
       .data(filtered, (d) => d.csp_clean + d.annee);
-
+    // Mise à jour des cercles existants
     circles.join(
       (enter) =>
         enter
@@ -200,7 +197,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
               .attr("stroke-width", 2)
               .attr("opacity", 1)
               .raise();
-
+            // Création du groupe pour le texte d'info
             const [line1, line2] = splitText(d.csp_clean, 28);
             const boxHeight = line2 ? 115 : 100;
             let infoX = x(d.sante_limitee) + 15;
@@ -273,7 +270,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       (exit) => exit.transition().duration(500).attr("r", 0).remove(),
     );
   }
-
+  
   updateScatter("Toutes");
 
   // Légende interactive
@@ -333,9 +330,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     });
   });
 
-  // ==========================================
-  // LÉGENDE POUR LA TAILLE DES BULLES (DYNAMIQUE)
-  // ==========================================
+  // Légende des tailles des cercles
   const sizeLegend = chart
     .append("g")
     .attr("transform", `translate(${width + 35}, 330)`);
@@ -349,7 +344,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .style("fill", "#2d3a4b")
     .text("Durée en emploi");
 
-  // Calcul dynamique basé sur tes vraies données pour la durée d'emploi
+  // Calcul dynamique pour la durée d'emploi
   const minEmp = Math.floor(d3.min(data, (d) => d.duree_emploi)) + 1;
   const maxEmp = Math.ceil(d3.max(data, (d) => d.duree_emploi));
   const midEmp = Math.round((minEmp + maxEmp) / 2);
@@ -380,10 +375,8 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .style("fill", "#2d3a4b")
     .text((d) => d + " ans");
 
-  // =============================================================
-  // VISUEL 2 : HEATMAP Santé par CSP et Année (INTERACTIVE)
-  // =============================================================
 
+  // HEATMAP 
   const marginHM = { top: 40, right: 100, bottom: 40, left: 180 };
   const widthHM = 850 - marginHM.left - marginHM.right;
   const heightHM = 400 - marginHM.top - marginHM.bottom;
@@ -461,9 +454,8 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .selectAll("text")
     .style("font-size", "11px");
 
-  // =============================================================
-  // CORRECTION DE L'AXE Y (ESPACEMENT DES TEXTES)
-  // =============================================================
+
+  // Ajout des axes
   svgHM
     .append("g")
     .call(d3.axisLeft(yHM))
@@ -481,10 +473,8 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
       }
     });
 
-  // =============================================================
-  // LÉGENDE DE LA HEATMAP (DÉGRADÉ CONTINU)
-  // =============================================================
 
+  // Ajout de la légende
   const legendWidth = 15;
   const legendHeight = 150;
 
@@ -503,7 +493,7 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .attr("y1", "100%")
     .attr("x2", "0%")
     .attr("y2", "0%");
-
+  
   linearGradient
     .selectAll("stop")
     .data(d3.ticks(0, 1, 10))
@@ -511,8 +501,8 @@ d3.dsv(";", "departretraite_parcsp.csv").then((data) => {
     .append("stop")
     .attr("offset", (d) => d * 100 + "%")
     .attr("stop-color", (d) => d3.interpolateYlOrRd(d));
-
-  legendHM
+ 
+  legendHM 
     .append("rect")
     .attr("width", legendWidth)
     .attr("height", legendHeight)

@@ -1,9 +1,9 @@
-// 1. CONFIGURATION DE L'ESPACE
+// On définit les marges et dimensions du graphique
 const margin = { top: 50, right: 50, bottom: 50, left: 60 };
 const width = 650 - margin.left - margin.right;
 const height = 400 - margin.top - margin.bottom;
 
-// OPTIMISATION : Mise en cache des éléments du DOM pour ne pas les chercher à chaque clic
+// On récupère les éléments HTML du panneau d'infos une seule fois (plus rapide)
 const panelTitle = d3.select("#panel-title");
 const panelMean = d3.select("#panel-mean");
 const panelMinCsp = d3.select("#panel-min-csp");
@@ -12,7 +12,7 @@ const panelMaxCsp = d3.select("#panel-max-csp");
 const panelMaxAge = d3.select("#panel-max-age");
 const panelGap = d3.select("#panel-gap");
 
-// 2. TOOLTIP
+// On crée une bulle d'info qui apparaît au survol
 const tooltip = d3
   .select("body")
   .append("div")
@@ -27,10 +27,10 @@ const tooltip = d3
   .style("font-family", "sans-serif")
   .style("font-size", "14px");
 
-// 3. CHARGEMENT ET TRANSFORMATION
+// On charge le fichier CSV et on commence le traitement
 d3.dsv(";", "departretraite_parcsp.csv")
   .then((data) => {
-    // NETTOYAGE DES DONNÉES
+    // On nettoie et convertit les données pour qu'elles soient exploitables
     data.forEach((d) => {
       d.annee = +d.annee;
       const ageString = d["Âge conjoncturel de départ à la retraite"];
@@ -41,8 +41,10 @@ d3.dsv(";", "departretraite_parcsp.csv")
       );
     });
 
+    // On extrait la liste des années disponibles
     const years = Array.from(new Set(data.map((d) => d.annee))).sort();
 
+    // On calcule l'âge moyen par année (pour la courbe principale)
     const dataGlobale = Array.from(
       d3.rollup(
         data,
@@ -52,14 +54,14 @@ d3.dsv(";", "departretraite_parcsp.csv")
       ([annee, age]) => ({ annee, age }),
     ).sort((a, b) => a.annee - b.annee);
 
-    // OPTIMISATION : Pré-calcul des stats globales (on trie une seule fois au chargement !)
+    // On calcule une fois pour toutes les stats globales (min, max, moyenne)
     const validData = data.filter((d) => d.age > 0);
     const ageMoyenTotal = d3.mean(validData, (d) => d.age);
     const allSorted = [...validData].sort((a, b) => a.age - b.age);
     const globalMin = allSorted[0];
     const globalMax = allSorted[allSorted.length - 1];
 
-    // 4. CRÉATION DU CONTENEUR SVG
+    // On crée le conteneur SVG du graphique
     const svg1 = d3
       .select("#graph-global")
       .append("svg")
@@ -68,6 +70,7 @@ d3.dsv(";", "departretraite_parcsp.csv")
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
+    // On ajoute un fond transparent cliquable pour désélectionner une année
     svg1
       .append("rect")
       .attr("width", width)
@@ -78,13 +81,14 @@ d3.dsv(";", "departretraite_parcsp.csv")
         updateVisuals();
       });
 
-    // 5. ÉCHELLES ET AXES
+    // On définit les échelles pour positionner les points sur le graphique
     const x1 = d3
       .scaleLinear()
       .domain(d3.extent(dataGlobale, (d) => d.annee))
       .range([0, width]);
     const y1 = d3.scaleLinear().domain([60, 64]).range([height, 0]);
 
+    // On dessine l'axe horizontal (années)
     svg1
       .append("g")
       .attr("transform", `translate(0,${height})`)
@@ -95,6 +99,7 @@ d3.dsv(";", "departretraite_parcsp.csv")
       .attr("fill", "black")
       .text("Année");
 
+    // On dessine l'axe vertical (âge moyen)
     svg1
       .append("g")
       .call(d3.axisLeft(y1))
@@ -105,26 +110,28 @@ d3.dsv(";", "departretraite_parcsp.csv")
       .attr("fill", "black")
       .text("Âge moyen");
 
-    // 6. DESSIN DE LA LIGNE
+    // On prépare le générateur de ligne
     const lineGen = d3
       .line()
       .x((d) => x1(d.annee))
       .y((d) => y1(d.age));
 
+    // On trace la courbe qui relie tous les points
     svg1
       .append("path")
       .datum(dataGlobale)
       .attr("fill", "none")
       .attr("stroke", "steelblue")
       .attr("stroke-width", 3)
-      .attr("d", lineGen) // C'est plus propre ici
+      .attr("d", lineGen)
       .style("pointer-events", "none");
 
+    // Variable pour savoir quelle année est sélectionnée
     let anneeSelectionnee = null;
 
-    // 7. CERCLES ET INTERACTIVITÉ
+    // On ajoute les points cliquables sur la courbe
     const circles = svg1
-      .selectAll(".point-global") // Bonne pratique : utiliser une classe
+      .selectAll(".point-global")
       .data(dataGlobale)
       .enter()
       .append("circle")
@@ -134,6 +141,7 @@ d3.dsv(";", "departretraite_parcsp.csv")
       .attr("stroke", "white")
       .attr("stroke-width", 2)
       .style("cursor", "pointer")
+      // Quand la souris passe sur un point, on affiche la bulle d'info
       .on("mouseover", function (event, d) {
         tooltip.transition().duration(200).style("opacity", 1);
         tooltip
@@ -144,30 +152,34 @@ d3.dsv(";", "departretraite_parcsp.csv")
           .style("top", event.pageY - 28 + "px");
         d3.select(this).attr("stroke", "black");
       })
+      // Quand la souris bouge, la bulle suit
       .on("mousemove", function (event) {
         tooltip
           .style("left", event.pageX + 15 + "px")
           .style("top", event.pageY - 28 + "px");
       })
+      // Quand la souris quitte le point, on cache la bulle
       .on("mouseout", function () {
         tooltip.transition().duration(500).style("opacity", 0);
         d3.select(this).attr("stroke", "white");
       })
+      // Au clic, on sélectionne/désélectionne l'année
       .on("click", function (event, d) {
         anneeSelectionnee = anneeSelectionnee === d.annee ? null : d.annee;
         updateVisuals();
       });
 
-    // 8. FONCTION DE MISE À JOUR
+    // Fonction qui met à jour l'apparence des points et le panneau d'infos
     function updateVisuals() {
+      // On change la couleur et taille du point sélectionné
       circles
         .attr("fill", (d) =>
           d.annee === anneeSelectionnee ? "#FF0000" : "steelblue",
         )
         .attr("r", (d) => (d.annee === anneeSelectionnee ? 9 : 6));
 
+      // Si aucune année n'est sélectionnée, on affiche les stats globales
       if (anneeSelectionnee === null) {
-        // Affichage instantané avec les variables globales pré-calculées
         panelTitle.text("Bilan (2013-2020)");
         panelMean.text(`Moyenne : ${ageMoyenTotal.toFixed(2)} ans`);
         panelMinCsp.text(`${globalMin.csp_clean} (en ${globalMin.annee})`);
@@ -176,6 +188,7 @@ d3.dsv(";", "departretraite_parcsp.csv")
         panelMaxAge.text(globalMax.age.toFixed(1));
         panelGap.text((globalMax.age - globalMin.age).toFixed(1));
       } else {
+        // Sinon, on affiche les stats de l'année sélectionnée
         const forYear = validData
           .filter((d) => d.annee === anneeSelectionnee)
           .sort((a, b) => a.age - b.age);
@@ -193,7 +206,7 @@ d3.dsv(";", "departretraite_parcsp.csv")
       }
     }
 
-    // Initialisation
+    // On affiche les stats globales au démarrage
     updateVisuals();
   })
   .catch((error) => console.error("Erreur chargement données :", error));
